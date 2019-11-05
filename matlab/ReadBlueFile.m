@@ -5,8 +5,8 @@
 %%
 %% Inputs
 %%
-%% filepath - Path to Blue File
-%% numSamples - Desired number of data samples (Optional)
+%% filepath - Path to Blue File (input)
+%% num_samples - Desired number of data samples (Optional)
 %% offset - Desired sample offset (Optional)
 %%
 %% Outputs
