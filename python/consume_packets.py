@@ -2,30 +2,38 @@
 
 import sys
 import math
+import struct
 import numpy as np
 import matplotlib.pyplot as plt
 import socket
 from scipy.fftpack import fft
 from scipy.signal import hanning
-import Packet
+import BasisPacket
 
-url = "renni.local"
-port = 9091
-
-packet = Packet.Packet()
-packetSize = packet.packetSize()
+mcast_group = "224.0.0.1"
+mcast_port = 9093
 
 if len(sys.argv) > 1:
-    url =  sys.argv[1]
+    mcast_group = sys.argv[1]
+if len(sys.argv) > 2:
+    mcast_port = int(sys.argv[2])
 
-# try to connect
-print("Attempting to connect to %s" % url)
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((url, port))
+# create packet object
+packet = BasisPacket.BasisPacket()
+# get packet size
+packetSize = packet.packetSize()
 
 try:
+    # try to connect
+    print("Attempting to connect to %s:%d" % (mcast_group, mcast_port))
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(('', mcast_port))
+    # connect to group
+    group = socket.inet_aton(mcast_group)
+    mreq = struct.pack('4sL', group, socket.INADDR_ANY)
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
     # try to get some data
-    raw = s.recv(packetSize)
+    (raw,address) = sock.recvfrom(packetSize)
     print("Received %d bytes" % len(raw))
     # de-packetize
     if packet.unpack(raw) == False:
@@ -62,5 +70,5 @@ try:
 except KeyboardInterrupt:
     pass
 
-s.close()
+sock.close()
 

@@ -34,7 +34,7 @@ DataFormats = {
     0xff:  0  # invalid
 }
 
-class Packet(object):
+class BasisPacket(object):
 
     def __init__(self):
         self.valid = False
@@ -72,7 +72,7 @@ class Packet(object):
             print("Invalid packet size %d, expecting (%d)" % (len(raw), packetSize))
             return False
         # unpack meta
-        (self.dataFormat, self.numBytes, self.fs, self.cf, self.packetNum) = struct.unpack('<HIddH', raw[0:24])
+        (self.dataFormat, self.numBytes, self.fs, self.cf, self.packetNum) = struct.unpack('<BIddH', raw[0:23])
         print("Format: 0x%x, data bytes: %u, fs: %f, cf: %f, pkt # %u" %
                 (self.dataFormat, self.numBytes, self.fs, self.cf, self.packetNum))
 
@@ -82,13 +82,15 @@ class Packet(object):
             return False
 
         # unpack (currently only supports 'short' format)
-        if self.__unpackData(raw[64:1024]) == False:
+        if self.__unpackData(self.dataFormat, raw[64:1024]) == False:
             print("Could not unpack data")
             return False
 
         return True
 
-    def __unpackData(self, buf):
+    def __unpackData(self, dataFormat, buf):
+        print("Unpacking data, format: 0x%x" % dataFormat)
+
         # unpack data
         numSamples = self.numSamples()
         if self.isComplex():
