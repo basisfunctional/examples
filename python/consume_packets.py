@@ -21,7 +21,7 @@ if len(sys.argv) > 2:
 # create packet object
 packet = BasisPacket.BasisPacket()
 # get packet size
-packetSize = packet.packetSize()
+packet_size = packet.packetSize()
 
 try:
     # try to connect
@@ -33,37 +33,45 @@ try:
     mreq = struct.pack('4sL', group, socket.INADDR_ANY)
     sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
     # try to get some data
-    (raw,address) = sock.recvfrom(packetSize)
+    (raw,address) = sock.recvfrom(packet_size)
     print("Received %d bytes" % len(raw))
     # de-packetize
     if packet.unpack(raw) == False:
         print("Could not de-packetize data")
         exit()
-    numSamples = packet.numSamples()
-    # fft (with normalization)
-    yf = np.fft.fftshift(fft(packet.data * hanning(numSamples)) / numSamples)
+    # get the number of samples
+    num_samples = packet.numSamples()
+    # get the IQ data
+    iq_samples = packet.data
+    # fft (apply a Hanning window)
+    yf = np.fft.fftshift(fft(iq_samples * hanning(num_samples)) / num_samples)
     # setting up our plots
-    # build fd axis
-    xf = np.linspace(-0.5*packet.fs+packet.cf, 0.5*packet.fs+packet.cf, numSamples)
-    # build td axis
-    xt = np.linspace(0, numSamples/packet.fs, numSamples)
-    # get the max time domain point
-    maxVal = 1.2*math.ceil(max(max(abs(packet.data.real)), max(abs(packet.data.imag))))
-    # plot
+    # build frequency domain axis
+    xf = 1e-6*np.linspace(-0.5*packet.fs, 0.5*packet.fs, num_samples)
+    # build time domain axis
+    xt = np.linspace(0, num_samples/packet.fs, num_samples)
+    # get the max time domain point (so we can do setup an axis range)
+    max_range = 1.2*math.ceil(max(max(abs(packet.data.real)), max(abs(packet.data.imag))))
+    # plot (note: data is currently always complex)
     if packet.isComplex:
         plt.figure(1)
+        plt.suptitle('Renni Capture')
         # time domain
         plt.subplot(211)
         plt.plot(xt, packet.data.real, 'r', label='real')
         plt.plot(xt, packet.data.imag, 'k', label='imag')
         legend = plt.legend(loc='upper right', shadow=True)
         plt.title('Time Domain')
-        plt.axis([0, xt[-1], -maxVal, maxVal])
+        plt.xlabel('Time (secs)')
+        plt.ylabel('Amplitude (ADC counts)')
+        plt.axis([0, xt[-1], -max_range, max_range])
         plt.grid()
         # frequency domain
         plt.subplot(212)
-        plt.semilogy(xf, np.abs(yf))
-        plt.title('Frequency Domain')
+        plt.plot(xf, 20*np.log10(np.abs(yf)))
+        plt.title('Frequency Domain (Center Frequency: ' + str(packet.cf*1e-6) + ' MHz)')
+        plt.xlabel('Frequency (MHz)')
+        plt.ylabel('Power (dBc)')
         plt.xlim([xf[0], xf[-1]])
         plt.grid()
         plt.show()
