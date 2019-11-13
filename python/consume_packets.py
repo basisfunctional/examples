@@ -10,7 +10,7 @@ from scipy.fftpack import fft
 from scipy.signal import hanning
 import BasisPacket
 
-mcast_group = "224.0.0.1"
+mcast_group = "224.12.34.56"
 mcast_port = 9093
 
 if len(sys.argv) > 1:
