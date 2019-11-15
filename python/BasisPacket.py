@@ -44,8 +44,8 @@ class BasisPacket(object):
         self.pktNum = 0
 
     def packetSize(self):
-        # sizes; header: 64, payload: 960
-        return 1024
+        # sizes; [header: 60, payload: 1376, footer: 4]
+        return 1440
 
     def isComplex(self):
         return self.dataFormat & 0xF0 == 0x80
@@ -82,17 +82,16 @@ class BasisPacket(object):
             return False
 
         # unpack (currently only supports 'short' format)
-        if self.__unpackData(self.dataFormat, raw[64:1024]) == False:
+        if self.__unpackData(self.dataFormat, raw[64:1436]) == False:
             print("Could not unpack data")
             return False
 
         return True
 
     def __unpackData(self, dataFormat, buf):
-        print("Unpacking data, format: 0x%x" % dataFormat)
-
         # unpack data
         numSamples = self.numSamples()
+        print("Unpacking data, format: 0x%x, numSamples: %d" % (dataFormat, numSamples))
         if self.isComplex():
             self.data = np.zeros(numSamples, dtype=complex)
             for m, n in zip(range(numSamples), range(0, len(buf), 4)):

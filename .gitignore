@@ -1,2 +1,4 @@
+c/consume_packets
+c/iq_data.bin
 matlab/qpsk_wave*.tmp
 python/BasisPacket.pyc

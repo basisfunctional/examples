@@ -11,7 +11,7 @@ from scipy.signal import hanning
 import BasisPacket
 
 mcast_group = "224.12.34.56"
-mcast_port = 9093
+mcast_port = 9083
 
 if len(sys.argv) > 1:
     mcast_group = sys.argv[1]
