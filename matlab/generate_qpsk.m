@@ -13,10 +13,10 @@
 clear all; clc;
 
 % settings
-desired_samples = 65536;
-upsample_ratio = 8;
-fs = 4e6;
-cf = 2420e6;
+desired_samples = 1000000;
+upsample_ratio = 5;
+fs = 20e6;
+cf = 2700e6;
 alpha = 0.5;
 format = 'CI';
 file_name = 'qpsk_wave_ci.tmp';
@@ -24,8 +24,8 @@ cp_len = 16;
 
 % generate a random symbols
 rbits = randi([0, 1], 1, 2*desired_samples);
-% perform a QPSK modulation (scale by 800)
-rsymbols = 800*(2*(complex(rbits(1:2:end)-0.5, rbits(2:2:end)-0.5)));
+% perform a QPSK modulation (scale by 3000 to appropriately load the DAC)
+rsymbols = 3000*(2*(complex(rbits(1:2:end)-0.5, rbits(2:2:end)-0.5)));
 % create zero-order hold buffer
 zoh_symbols = zeros(1, upsample_ratio*(desired_samples+cp_len));
 % create the cyclic prefix
