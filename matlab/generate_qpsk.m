@@ -13,9 +13,9 @@
 clear all; clc;
 
 % settings
-desired_samples = 1000000;
-upsample_ratio = 5;
-fs = 20e6;
+desired_samples = 800000;
+upsample_ratio = 10;
+fs = 40e6;
 cf = 2700e6;
 alpha = 0.5;
 format = 'CI';
